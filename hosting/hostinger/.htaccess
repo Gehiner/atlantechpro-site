@@ -1,0 +1,70 @@
+# AtlanTech Pro — static site for Hostinger Web Premium (LiteSpeed/Apache, .htaccess enabled).
+# `bun run build:static` copies this file to dist/client/.htaccess.
+# Upload the CONTENTS of dist/client/ to public_html, including this hidden file.
+
+Options -Indexes
+DirectoryIndex index.html
+# Required for the clean-URL rule below: without it Apache redirects /contacto -> /contacto/
+# (mod_dir) before the rewrite runs. Directory listings stay disabled by `Options -Indexes`.
+DirectorySlash Off
+AddDefaultCharset UTF-8
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- HTTPS + canonical host ------------------------------------------------------------
+  # Uncomment ONLY after the SSL certificate is active for the domain in hPanel and
+  # https://atlantechpro.com opens correctly; otherwise visitors would get certificate errors.
+  # RewriteCond %{HTTPS} off
+  # RewriteRule ^ https://atlantechpro.com%{REQUEST_URI} [L,R=301]
+  # RewriteCond %{HTTP_HOST} ^www\.atlantechpro\.com$ [NC]
+  # RewriteRule ^ https://atlantechpro.com%{REQUEST_URI} [L,R=301]
+
+  # --- Clean URLs --------------------------------------------------------------------------
+  # Pages are exported as <route>/index.html. Serve /contacto from contacto/index.html
+  # without the 301 redirect to /contacto/, so it matches the canonical URL of each page.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
+  RewriteRule ^(.+[^/])$ $1/index.html [L]
+</IfModule>
+
+# --- Hidden files (.htaccess, .env, ...) are never served ----------------------------------
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Compression ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml
+  AddOutputFilterByType DEFLATE application/javascript text/javascript application/json image/svg+xml
+</IfModule>
+
+# --- Caching -------------------------------------------------------------------------------
+# JS/CSS in /assets/ have content hashes in their names: safe to cache for a year.
+# HTML must always be revalidated so new deployments show up immediately.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # favicon.png and og-image.jpg are not fingerprinted: moderate cache.
+  ExpiresByType image/png "access plus 1 week"
+  ExpiresByType image/jpeg "access plus 1 week"
+  ExpiresByType text/plain "access plus 1 hour"
+  ExpiresByType application/xml "access plus 1 hour"
+</IfModule>

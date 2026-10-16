@@ -1,0 +1,11 @@
+node_modules
+dist
+.output
+.vinxi
+pnpm-lock.yaml
+package-lock.json
+bun.lock
+# Auto-generated (Lovable/Supabase) or managed by Lovable: never reformat
+src/integrations/supabase/
+AGENTS.md
+routeTree.gen.ts

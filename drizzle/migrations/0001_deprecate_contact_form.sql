@@ -1,0 +1,3 @@
+REVOKE EXECUTE ON FUNCTION public.submit_contact_request(text, text, text, text, text, text, text) FROM PUBLIC, anon, authenticated;
+COMMENT ON FUNCTION public.submit_contact_request(text, text, text, text, text, text, text) IS 'DEPRECATED: contact form removed in V1 (WhatsApp is the only channel). Safe to drop.';
+COMMENT ON TABLE public.contact_requests IS 'DEPRECATED: contact form removed in V1. Contains only a QA test row. Safe to drop.';
